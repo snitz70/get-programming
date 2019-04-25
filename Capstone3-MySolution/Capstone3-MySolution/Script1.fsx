@@ -33,3 +33,13 @@ let account =
     |> Seq.map getAmount
     |> Seq.fold processCommand openingAccount
 
+open System
+
+let consoleCommands = seq {
+    while true do
+        Console.Write "(d)eposit, (w)ithdraw or e(x)it: "
+        yield Console.ReadKey().KeyChar
+}
+
+consoleCommands
+
