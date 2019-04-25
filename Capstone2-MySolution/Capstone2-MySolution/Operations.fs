@@ -15,12 +15,14 @@ let auditAs (operationName: string) (audit:Account -> string -> unit)
     (operation:decimal -> Account -> Account) (amount:decimal)
     (account:Account) : Account =
 
+    audit account (sprintf "Performing %s operation for $%.2f... \r\n" operationName amount )
+    
     let newAccount = operation amount account
 
     if newAccount = account then    
-        audit account (sprintf "%s failed" operationName)
+        audit account "Transaction rejected!\r\n"
         account
     else 
-        audit account (sprintf "%s of $%.2f successfull" operationName amount)
+        audit account (sprintf "Transaction accepted!  Balance is now $%.2f\r\n" newAccount.Balance)
         newAccount
 

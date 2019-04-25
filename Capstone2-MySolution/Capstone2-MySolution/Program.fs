@@ -15,28 +15,27 @@ let openingBalance =
     Console.Write("Enter opening Balance: ")
     Console.ReadLine()
 
-//let action = 
-//    Console.Write ("(d)eposit, (w)ithdraw. or e(x)it: ")
-//    Console.ReadLine()
-
 [<EntryPoint>]
 let main argv = 
-    let withdrawConsoleAudit = auditAs "Withdraw" console withdraw 
-    let depositConsoleAudit = auditAs "Deposit" console deposit
+    let withdrawConsoleAudit = auditAs "withdraw" fileSystemAudit withdraw 
+    let depositConsoleAudit = auditAs "deposit" fileSystemAudit deposit
 
-    let account = 
+    let mutable account = 
         { Id = Guid.NewGuid(); Owner = { Name = name }; Balance = Decimal.Parse(openingBalance) }
 
     while true do
         let action = 
             Console.Write ("(d)eposit, (w)ithdraw. or e(x)it: ")
-            Console.ReadLine()      
-            
+            Console.ReadLine()  
+
         if action = "x" then Environment.Exit 0
-        if action = "d" then account |> depositConsoleAudit 10M
-        elif action = "w" then account |> withdrawConsoleAudit 10M
-        else account
 
-
-    printfn "%A" account
-    0 // return an integer exit code
+        let amount = 
+            Console.Write("Enter amount: ")
+            Decimal.Parse(Console.ReadLine())
+                    
+        account <-
+            if action = "d" then account |> depositConsoleAudit amount
+            elif action = "w" then account |> withdrawConsoleAudit amount
+            else account
+    0

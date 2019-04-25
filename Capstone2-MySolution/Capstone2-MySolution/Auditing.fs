@@ -8,7 +8,7 @@ let fileSystemAudit account message =
     let dir = Directory.CreateDirectory(path)
 
     let fileName = sprintf @"%s\%s.txt" (path) (account.Id.ToString())
-    File.WriteAllText(fileName, message)
+    File.AppendAllText(fileName, message)
 
 let console account message =
     printfn "Account %s: %s" (account.Id.ToString()) message
