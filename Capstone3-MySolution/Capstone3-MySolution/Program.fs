@@ -5,8 +5,12 @@ open Operations
 open Auditing
 open System
 
-let openingAccount = { Owner = { Name = "Brian" }; Balance = 0M; Id = System.Guid.Empty }
+let name = 
+    Console.Write("Enter name: ")
+    Console.ReadLine()
 
+let depositWithConsoleAudit = auditAs "deposit" console deposit
+let withdrawConsoleAudit = auditAs "withdraw" console withdraw
 
 let isValidCommand command =
     command = 'd' || command = 'w' || command = 'x'
@@ -14,47 +18,35 @@ let isValidCommand command =
 let isStopCommand command = 
     command = 'x'
 
-let account = 
-    //let commands = [ 'd'; 'w'; 'z'; 'f'; 'd'; 'x'; 'w' ]
+let getConsoleAmount command = 
+    Console.WriteLine()
+    Console.Write("Enter amount: ")
+    command, Decimal.Parse(Console.ReadLine())
 
-    let printBalance account = 
-        printfn "Current balance is $%.2f" account.Balance
+let processCommand account (command, amount) = 
+    match command with 
+    | 'd' -> account |> depositWithConsoleAudit amount
+    | 'w' -> account |> withdrawConsoleAudit amount
+    | _ -> account
 
-    let consoleCommands = seq {
-        while true do
-            Console.Write "(d)eposit, (w)ithdraw or e(x)it: "
-            yield Console.ReadKey().KeyChar
-    }
-
-    let getConsoleAmount command = 
-        Console.WriteLine()
-        Console.Write("Enter amount: ")
-        command, Decimal.Parse(Console.ReadLine())
-
-    //let getAmount command = 
-    //    match command with  
-    //    | 'd' -> (command, 50M)
-    //    | 'w' -> (command, 25M)
-    //    | _ -> ('x', 0M)
-
-    let depositWithConsoleAudit = auditAs "deposit" console deposit
-    let withdrawConsoleAudit = auditAs "withdraw" console withdraw
-
-    let processCommand account (command, amount) = 
-        match command with 
-        | 'd' -> account |> depositWithConsoleAudit amount
-        | 'w' -> account |> withdrawConsoleAudit amount
-        | _ -> account
-
-    consoleCommands
-    |> Seq.filter isValidCommand
-    |> Seq.takeWhile (not << isStopCommand)
-    |> Seq.map getConsoleAmount
-    |> Seq.fold processCommand openingAccount
 
 [<EntryPoint>]
 let main argv = 
-    account
+    let openingAccount = { Owner = { Name = name }; Balance = 0M; Id = Guid.NewGuid() }
 
+    let account = 
+        let consoleCommands = seq {
+            while true do
+                Console.Write "(d)eposit, (w)ithdraw or e(x)it: "
+                yield Console.ReadKey().KeyChar
+        }
+
+        consoleCommands
+        |> Seq.filter isValidCommand
+        |> Seq.takeWhile (not << isStopCommand)
+        |> Seq.map getConsoleAmount
+        |> Seq.fold processCommand openingAccount
+
+    let endingAccount = account
     0
 
