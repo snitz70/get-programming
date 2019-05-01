@@ -26,6 +26,12 @@ let auditAs operationName audit operation amount account =
     audit account.AccountId account.Owner.Name transaction
     updatedAccount
 
+let tryParseBankOp operation = 
+    match operation with
+    | "withdraw" -> Some Withdraw
+    | "deposit" -> Some Deposit
+    | _ -> None
+
 /// Creates an account from a historical set of transactions
 let loadAccount (owner, accountId, transactions) =
     let openingAccount = { AccountId = accountId; Balance = 0M; Owner = { Name = owner } }
@@ -33,5 +39,10 @@ let loadAccount (owner, accountId, transactions) =
     transactions
     |> Seq.sortBy(fun txn -> txn.Timestamp)
     |> Seq.fold(fun account txn ->
-        if txn.Operation = "withdraw" then account |> withdraw txn.Amount
-        else account |> deposit txn.Amount) openingAccount
+        match tryParseBankOp txn.Operation with
+        | Some Deposit -> account |> deposit txn.Amount
+        | Some Withdraw -> account |> withdraw txn.Amount
+        | None -> account ) openingAccount
+
+        //if txn.Operation = "withdraw" then account |> withdraw txn.Amount
+        //else account |> deposit txn.Amount) openingAccount

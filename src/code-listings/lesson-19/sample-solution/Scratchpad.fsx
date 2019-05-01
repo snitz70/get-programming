@@ -50,3 +50,56 @@ transactions = (transactions |> List.map (Transactions.serialize >> Transactions
 let accountId = Guid.Empty
 let owner = "Isaac"
 let loadedAccount = loadAccount(owner, accountId, transactions)
+
+
+type Guess =
+    | Rock
+    | Paper
+    | Scisors
+
+type Winner = 
+    | Computer
+    | Player
+    | Tie
+
+type Turn = (Guess * Guess) -> Winner
+
+let playerGuess() = 
+    Console.WriteLine ("Enter Rock, Paper, Scisors: ")    
+    Console.ReadLine()
+
+open Microsoft.FSharp.Reflection
+
+let computerGuess() = 
+    let guesses = typeof<Guess> |> FSharpType.GetUnionCases
+    let random = Random()
+    [for item in guesses -> item.Name].[random.Next(3)]
+
+let game (playerGuess, computerGuess) = 
+    match playerGuess with
+    | Rock -> 
+        match computerGuess with
+        | Rock -> Tie
+        | Paper -> Computer
+        | Scisors -> Player
+    | Scisors ->
+        match computerGuess with 
+        | Scisors -> Tie
+        | Rock -> Computer
+        | Paper -> Player
+    | Paper ->
+        match computerGuess with
+        | Paper -> Tie
+        | Rock -> Player
+        | Scisors -> Computer
+
+
+
+    
+
+    
+    
+
+
+
+
