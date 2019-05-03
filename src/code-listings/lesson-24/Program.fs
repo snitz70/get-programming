@@ -6,7 +6,13 @@ open Capstone4.Operations
 
 let withdrawWithAudit = auditAs "withdraw" Auditing.composedLogger withdraw
 let depositWithAudit = auditAs "deposit" Auditing.composedLogger deposit
-let loadAccountFromDisk = FileRepository.findTransactionsOnDisk >> Operations.loadAccount
+//let loadAccountOptional value = 
+//    match value with
+//    | Some value -> Some(Operations.loadAccount value)
+//    | None -> None
+
+let loadAccountOptional = Option.map Operations.loadAccount
+let tryLoadAccountFromDisk = FileRepository.tryFindTransactionsOnDisk >> loadAccountOptional
 
 [<AutoOpen>]
 module CommandParsing =
@@ -57,7 +63,18 @@ module UserInput =
 let main _ =
     let openingAccount =
         Console.Write "Please enter your name: "
-        Console.ReadLine() |> loadAccountFromDisk
+        let owner = Console.ReadLine()
+
+        match (tryLoadAccountFromDisk owner) with
+        | Some account -> account
+        | None -> 
+            { Balance = 0M
+              AccountId = Guid.NewGuid()
+              Owner = { Name = owner } }
+
+    //let openingAccount =
+    //    Console.Write "Please enter your name: "
+    //    Console.ReadLine() |> loadAccountFromDisk
     
     printfn "Current balance is £%M" openingAccount.Balance
 
